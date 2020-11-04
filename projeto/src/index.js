@@ -17,16 +17,16 @@ app.use(express.json());
  * request body: conteúdo na hora de criar ou atualizar um recurso (JSON)
  */
 
- /**
-  * MIDDLEWARE
-  * 
-  * É um interceptador de requisisções que ele pode:
-  *     - interromper totalmente a requisção(tipo, essa requisição aqui não precisa continuar, então ele interrompe ela)
-  *     - alterar dados da requisição
-  * A gente pode usar um middleware quando queremos que um trecho de codigo seja disparado automaticamente em 1 ou mais rotas da aplicação
-  * Um exemplo bem pratico é um log, que você pode colocar para ser disparado cada vez que uma rota GET,PUT,POST e etc for acionada
-  * 
-  */
+/**
+ * MIDDLEWARE
+ * 
+ * É um interceptador de requisisções que ele pode:
+ *     - interromper totalmente a requisção(tipo, essa requisição aqui não precisa continuar, então ele interrompe ela)
+ *     - alterar dados da requisição
+ * A gente pode usar um middleware quando queremos que um trecho de codigo seja disparado automaticamente em 1 ou mais rotas da aplicação
+ * Um exemplo bem pratico é um log, que você pode colocar para ser disparado cada vez que uma rota GET,PUT,POST e etc for acionada
+ * 
+ */
 
 const projects = [];
 
@@ -56,6 +56,7 @@ function validateProjectId(request, response, next) {
 }
 
 app.use(logRequests);//se declarar assim nesse fluxo ele vai enviar para todas as requisições, mas da pra implementar somente na requisição que eu quiser
+app.use('/projects/:id', validateProjectId);
 
 app.get('/projects', (request, response) => {
     const { title } = request.query;
@@ -70,7 +71,7 @@ app.get('/projects', (request, response) => {
 app.post('/projects', (request, response) => {
 
     const { title, owner } = request.body;
-    
+
     const project = { id: uuid(), title, owner };
     projects.push(project);
 
@@ -81,13 +82,10 @@ app.post('/projects', (request, response) => {
 app.put('/projects/:id', (request, response) => {
 
     const { id } = request.params;
-    const {title, owner } = request.body;
-
-    const projectIndex = projects.findIndex(project => project.id === id);
-
+    const { title, owner } = request.body;validateProjectId
     //quando não existe o valor no array o retorno é -1 e por isso vericamos se for < 0
     if (projectIndex < 0) {
-        return response.status(400).json({ error: "Project not found."});
+        return response.status(400).json({ error: "Project not found." });
     }
 
     //aqui a gente cria um objeto novo zerado e com as informações atualizadas do update
@@ -110,7 +108,7 @@ app.delete('/projects/:id', (request, response) => {
 
     //quando não existe o valor no array o retorno é -1 e por isso vericamos se for < 0
     if (projectIndex < 0) {
-        return response.status(400).json({ error: "Project not found."});
+        return response.status(400).json({ error: "Project not found." });
     }
 
     //splice retira algo do array e o numero 1 é para informar o que quero retirar do array depois do que eu encontrei,
@@ -120,11 +118,11 @@ app.delete('/projects/:id', (request, response) => {
     return response.status(204).send();
 });
 
- // ENDPOINT TESTE
+// ENDPOINT TESTE
 app.get('/projects/array/:id', (request, response) => {
     const projects = [];
     const { id } = request.params;
-    
+
     const results = id
         ? projects.filter(project => project.id.includes(id))
         : projects;
